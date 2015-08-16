@@ -30,4 +30,10 @@
         android:background="?android:attr/selectableItemBackground"
         android:id="@+id/show_answer_button"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:id="@+id/apilevel_text_view" />
+
 </LinearLayout>

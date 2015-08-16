@@ -27,6 +27,8 @@ public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
     private static final int REQUEST_CODE_CHEAT = 0;
+    //Challenge #2 - persist cheating state
+    private static final String IS_CHEATING = "cheating";
     //Create model objects
     private Question[] mQuestonBank = new Question[] {
         new Question(R.string.question_oceans, true),
@@ -37,7 +39,7 @@ public class QuizActivity extends AppCompatActivity {
     };
     //Create assorted variables
     private int mCurrentIndex = 0;
-    private boolean mIsCheater;
+    private boolean[] mIsCheater = {false, false, false, false, false};
 
     //Overriden functions
 
@@ -53,6 +55,14 @@ public class QuizActivity extends AppCompatActivity {
         //Wire up the button objects to their resource IDs
         //and add listeners with functions to adt on
         mTrueButton = (Button) findViewById(R.id.true_button);
+
+        //Persist the state of the activity
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            //Chanllenge #2 set boolean is cheating from persisted state
+            mIsCheater[mCurrentIndex] = savedInstanceState.getBoolean(IS_CHEATING);
+
+        }
 
         //Using an anonymous function approach
         mTrueButton.setOnClickListener(new View.OnClickListener(){
@@ -71,6 +81,7 @@ public class QuizActivity extends AppCompatActivity {
         mPrevButton = (ImageButton) findViewById(R.id.prev_button);
         mPrevButton.setOnClickListener(new View.OnClickListener(){
             @Override public void onClick(View v){
+                //Challenge #2 set the
                 //We need to avoid a divide by zero in the modulus
                 if(mCurrentIndex == 1) {
                     mCurrentIndex = 0;
@@ -85,6 +96,9 @@ public class QuizActivity extends AppCompatActivity {
                         }
                     }
                 }
+                //Challenge #2 Remove since we are keeping all cheats in an array
+                //mIsCheater[mCurrentIndex] = false;
+
                 updateQuestion();
             }
         });
@@ -93,12 +107,14 @@ public class QuizActivity extends AppCompatActivity {
         mNextButton.setOnClickListener(new View.OnClickListener(){
             @Override public void onClick(View v){
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestonBank.length;
-                mIsCheater = false;
+                //Challenge #2 Remove since we are keeping all cheats in an array
+                //mIsCheater[mCurrentIndex] = false;
+
                 updateQuestion();
             }
         });
 
-       //Challenge extras - make the text view move to the next question
+       //Challenge #1 - make the text view move to the next question
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,10 +123,6 @@ public class QuizActivity extends AppCompatActivity {
                 updateQuestion();
             }
         });
-
-        if (savedInstanceState != null) {
-            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
-        }
 
         //Added cheat activity
         mCheatButton = (Button) findViewById(R.id.cheat_button);
@@ -138,15 +150,20 @@ public class QuizActivity extends AppCompatActivity {
             if(data == null) {
                 return;
             }
-            mIsCheater = CheatActivity.wasAnwwerShown(data);
+            mIsCheater[mCurrentIndex] = CheatActivity.wasAnwwerShown(data);
         }
+
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        Log.i(TAG, "onSaveInstanceState");
+        //Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        //Challenge2 - Retain the state of the cheat option
+        //in case the orientation changes
+        savedInstanceState.putBoolean(IS_CHEATING, mIsCheater[mCurrentIndex]);
+
     }
 
     @Override
@@ -186,8 +203,6 @@ public class QuizActivity extends AppCompatActivity {
         return true;
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -216,7 +231,7 @@ public class QuizActivity extends AppCompatActivity {
 
         int messageResId;
 
-        if (mIsCheater) {
+        if (mIsCheater[mCurrentIndex]) {
             messageResId = R.string.judgement_toast;
         } else {
             if (userPressedTrue == answerIsTrue) {
