@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.text.format.DateFormat;
+
 
 public class CrimeFragment extends Fragment {
 
@@ -19,6 +23,7 @@ public class CrimeFragment extends Fragment {
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private static final String TAG = "CrimeFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +58,11 @@ public class CrimeFragment extends Fragment {
         });
 
         mDateButton = (Button)v.findViewById(R.id.crime_date);
-        mDateButton.setText(mCrime.getDate().toString());
+        //08-24-15 Added for challenge one to convert date time stamp to simple date
+        String formatedDate = DateFormat.format("EEEE , MMM dd yyyy", mCrime.getDate()).toString();
+        Log.d(TAG, "formatedDate: " + formatedDate);
+        //mDateButton.setText(mCrime.getDate().toString());
+        mDateButton.setText(formatedDate);
         mDateButton.setEnabled(false);
 
         mSolvedCheckBox = (CheckBox)v.findViewById(R.id.crime_solved);
