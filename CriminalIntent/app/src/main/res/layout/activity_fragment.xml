@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:tools="http://schemas.android.com/tools"
        android:orientation="vertical"
        android:layout_gravity="center"
@@ -8,4 +8,4 @@
        tools:context="CrimeActivity"
        android:id="@+id/fragmentContainer" >
 
-</LinearLayout>
+</FrameLayout>
