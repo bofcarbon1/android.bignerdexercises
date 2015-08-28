@@ -1,17 +1,19 @@
 package com.bignerdranch.android.criminalintent;
 
-import android.app.LauncherActivity;
 import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//CrimeLab works at the model level with fragments
+//and fragment adapters to manage the crime data
 public class CrimeLab {
 
     private static CrimeLab sCrimeLab;
     private List<Crime> mCrimes;
 
     //This static usage makes it a singleton class
+    //it gets instantiated once per session
     public static CrimeLab get(Context context) {
         if (sCrimeLab == null) {
             sCrimeLab = new CrimeLab(context);

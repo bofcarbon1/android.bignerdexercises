@@ -1,23 +1,27 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import java.util.List;
 
 public class CrimeListFragment extends Fragment {
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+    private static final String TAG = "CrimeListFragment";
+    private static final String ARG_CRIKME_ID = "crime_id";
+    private int mCurrentPosition = 0;
+    private static final String KEY_INDEX = "index";
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -34,13 +38,31 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    //Realod the list of crimes in RecyclerView
     private void updateUI () {
 
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if (mAdapter == null) {
+            //Load list of crimes through fragment adapter for first time
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }
+        else {
+            //Reload list of crimes for existing fragment adapter
+            //08-27-15 Chapter 10 Challenge #1
+            //Currently the statement below reloads all of crime objects in array
+            //mAdapter.notifyDataSetChanged();
+            //Reload the crime view but only for the position ID of the changed layout object
+            mAdapter.notifyItemChanged(mCurrentPosition);
+        }
 
     }
 
@@ -49,6 +71,7 @@ public class CrimeListFragment extends Fragment {
         implements View.OnClickListener{
 
         private TextView mTitleTextView;
+        private TextView mDetailTextView;
         private TextView mDateTextView;
         private CheckBox mSolvedCheckBox;
         private Crime mCrime;
@@ -61,6 +84,8 @@ public class CrimeListFragment extends Fragment {
 
             mTitleTextView = (TextView)
                     itemView.findViewById(R.id.list_item_crime_title_text_view);
+            mDetailTextView = (TextView)
+                    itemView.findViewById(R.id.list_item_crime_detail_text_view);
             mDateTextView = (TextView)
                     itemView.findViewById(R.id.list_item_crime_date_text_view);
             mSolvedCheckBox = (CheckBox)
@@ -71,15 +96,21 @@ public class CrimeListFragment extends Fragment {
         public void bindCrime(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
+            mDetailTextView.setText(mCrime.getDetail());
             mDateTextView.setText(mCrime.getDate().toString());
             mSolvedCheckBox.setChecked(mCrime.isSolved());
         }
 
-        //Listen for a click on any of the list items
+        //Listen for a click on any of the list items then
+        //start the crime activity (crime details)
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(),
-                    mCrime.getTitle() + "clicked!", Toast.LENGTH_SHORT).show();
+
+            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            mCurrentPosition = getLayoutPosition();
+            //Log.d(TAG, "position: " + mCurrentPosition);
+            startActivity(intent);
+
         }
 
     }

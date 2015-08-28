@@ -1,33 +1,32 @@
 package com.bignerdranch.android.criminalintent;
 
-//import android.os.Bundle;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
-//import android.support.v4.app.FragmentActivity;
-//import android.support.v4.app.FragmentManager;
+
+import java.util.UUID;
 
 public class CrimeActivity extends SingleFragmentActivity {
 
-    //@Override
-    //protected void onCreate(Bundle savedInstanceState) {
-    //    super.onCreate(savedInstanceState);
-    //    setContentView(R.layout.activity_fragment);
+    private static final String EXTRA_CRIME_ID =
+            "com.bignerdranch.android.criminalintent.crime_id";
 
-    //    //Work with the fragment hosted by this activity via the fragment manager
-    //    FragmentManager fm = getSupportFragmentManager();
-    //    //Get the fragment refereneced in activity_fragmentent.xml from the fragment manager
-    //    Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
-    //    //If the fragment does not exist add it to the fragment manager
-    //    if (fragment == null) {
-    //       fragment = new CrimeFragment();
-    //       fm.beginTransaction()
-    //               .add(R.id.fragmentContainer, fragment)
-    //                .commit();
-    //    }
+    //Return an Intent that contains the static ID of the crime
+    public static Intent newIntent(Context pageContext, UUID crimeId) {
 
-    //}
+        Intent intent = new Intent(pageContext, CrimeActivity.class);
+        intent.putExtra(EXTRA_CRIME_ID, crimeId);
+        return intent;
+
+    }
+
     @Override
     protected Fragment createFragment() {
-        return new CrimeFragment();
+
+        UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID);
+        return CrimeFragment.newInstance(crimeId);
+
     }
 
 }
+

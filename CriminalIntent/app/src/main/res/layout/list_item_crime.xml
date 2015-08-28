@@ -21,18 +21,27 @@
         android:layout_toStartOf="@id/list_item_crime_solved_checkbox"
         android:textStyle="bold"
         android:padding="4dp"
-        tools:text="Crime Title"/>
-
+        tools:text="Crime Title"
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list_item_crime_date_text_view"
+        android:id="@+id/list_item_crime_detail_text_view"
         android:layout_toStartOf="@id/list_item_crime_solved_checkbox"
         android:layout_below="@id/list_item_crime_title_text_view"
         android:padding="4dp"
         tools:text="Crime Date"
         />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_item_crime_date_text_view"
+        android:layout_toStartOf="@id/list_item_crime_solved_checkbox"
+        android:layout_below="@id/list_item_crime_detail_text_view"
+        android:padding="4dp"
+        tools:text="Crime Details"
+        />
 
 </RelativeLayout>
