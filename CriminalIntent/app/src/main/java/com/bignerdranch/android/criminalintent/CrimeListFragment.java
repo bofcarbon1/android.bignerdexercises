@@ -106,7 +106,8 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
-            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            //08-29-15 modified to use CrimePagerActivity to page through crimes
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
             mCurrentPosition = getLayoutPosition();
             //Log.d(TAG, "position: " + mCurrentPosition);
             startActivity(intent);
