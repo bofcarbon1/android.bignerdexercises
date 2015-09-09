@@ -197,7 +197,6 @@ public class CrimeFragment extends Fragment {
                     .getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setTime(time);
             String formatedTime = DateFormat.format("HH:mm", mCrime.getTime()).toString();
-            //updateTime(mCrime.getTime().toString());
             updateTime(formatedTime);
         }
 
