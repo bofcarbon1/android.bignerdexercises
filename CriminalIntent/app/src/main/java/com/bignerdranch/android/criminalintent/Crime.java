@@ -9,12 +9,14 @@ public class Crime {
     private String mTitle;
     private String mDetail;
     private Date mDate;
+    private Date mTime;
     private boolean mSolved;
 
     public Crime() {
         //Generate unique identifier
         mId = UUID.randomUUID();
         mDate = new Date();
+        mTime = new Date();
     }
 
     public String getTitle() {
@@ -47,15 +49,28 @@ public class Crime {
         return mSolved;
     }
 
-    public void setSolved(boolean solved) {
+    public void setSolved(boolean solved)
+    {
         mSolved = solved;
     }
 
-    public String getDetail() {
+    public String getDetail()
+    {
         return mDetail;
     }
 
-    public void setDetail(String detail) {
+    public void setDetail(String detail)
+    {
         mDetail = detail;
     }
+
+    public Date getTime() {
+        return mTime;
+    }
+
+    public void setTime(Date time)
+    {
+        mTime = time;
+    }
+
 }
