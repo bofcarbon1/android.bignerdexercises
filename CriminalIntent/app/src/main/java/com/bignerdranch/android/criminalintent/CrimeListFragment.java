@@ -56,7 +56,6 @@ public class CrimeListFragment extends Fragment {
         }
 
         updateUI();
-
         return view;
     }
 
@@ -110,7 +109,10 @@ public class CrimeListFragment extends Fragment {
     private void updateSubtitle() {
         CrimeLab crimelab = CrimeLab.get(getActivity());
         int crimeCount = crimelab.getCrimes().size();
-        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        //9-13-15 Ch 13 - Challenge #2 adjust sub title based on size
+        //String subtitle = getString(R.string.subtitle_format, crimeCount);
+        String subtitle = getResources()
+                .getQuantityString(R.plurals.subtitle_plural, crimeCount, crimeCount);
 
         if (!mSubtitleVisible) {
             subtitle = null;
