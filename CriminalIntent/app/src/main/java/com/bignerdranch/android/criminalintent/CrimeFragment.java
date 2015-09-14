@@ -11,6 +11,9 @@ import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -39,6 +42,8 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     //09-03-15 Added for time challenge
     private static final int REQUEST_TIME = 1;
+    //09-11-15 Added for Ch 12 Challenge 1 delete
+    private static final int REQUEST_DELETE = 3;
 
     //Create bundle arguments for the fragment
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -57,6 +62,9 @@ public class CrimeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        //9-11-15 Added Ch 12 Challenge 1
+        setHasOptionsMenu(true);
 
         //Retrieve extra using intent with argument bundle to get a crime detail object
         //UUID crimeId = (UUID) getActivity().getIntent().getSerializableExtra(CrimeActivity.EXTRA_CRIME_ID);
@@ -188,7 +196,9 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data
                     .getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
-            updateDate(mCrime.getDate().toString());
+            String formatedDate = DateFormat.format("EEEE , MMM dd yyyy", mCrime.getDate()).toString();
+            //updateDate(mCrime.getDate().toString());
+            updateDate(formatedDate);
         }
 
         //09-03-15 added for time challenge
@@ -209,5 +219,36 @@ public class CrimeFragment extends Fragment {
     private void updateTime(String text) {
         mTimeButton.setText(text);
     }
+
+    //9-11-15 Added Ch 12 Challenge 1
+    //Handle the creation of the menu when a callback is done
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_crime:
+                //Log.d(TAG, "started menu_item_delete_crime.");
+                //Get the persisted id of the crime
+                UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIKME_ID);
+                //Remove the crime
+                CrimeLab.get(getActivity()).deleteCrime(crimeId);
+                //Start a new intent back to the CrimeListActivity
+                Intent intent = CrimeListActivity
+                            .newIntent(getActivity());
+                //This will clear any previous
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
 }
