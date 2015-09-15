@@ -14,7 +14,15 @@ public class Crime {
 
     public Crime() {
         //Generate unique identifier
-        mId = UUID.randomUUID();
+        //9-14-15 Changed to use SQLite
+        this(UUID.randomUUID());
+        //mId = UUID.randomUUID();
+        //mDate = new Date();
+        //mTime = new Date();
+    }
+
+    public Crime(UUID id) {
+        mId = id;
         mDate = new Date();
         mTime = new Date();
     }

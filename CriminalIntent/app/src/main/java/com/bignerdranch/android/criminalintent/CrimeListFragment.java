@@ -139,6 +139,10 @@ public class CrimeListFragment extends Fragment {
             //Currently the statement below reloads all of crime objects in array
             //mAdapter.notifyDataSetChanged();
             //Reload the crime view but only for the position ID of the changed layout object
+
+            //9-14-15 Ch 13 SQLite
+            mAdapter.setCrimes(crimes);
+
             mAdapter.notifyItemChanged(mCurrentPosition);
         }
 
@@ -236,8 +240,13 @@ public class CrimeListFragment extends Fragment {
         }
 
         @Override
-        public int getItemCount() {
+        public int getItemCount()
+        {
             return mCrimes.size();
+        }
+
+        public void setCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
         }
 
     }

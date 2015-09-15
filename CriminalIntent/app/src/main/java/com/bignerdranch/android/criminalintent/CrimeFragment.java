@@ -73,6 +73,15 @@ public class CrimeFragment extends Fragment {
 
     }
 
+    //9-14-15 Added Ch 13 SQ:ote database usage
+    @Override
+    public void onPause() {
+        super.onPause();;
+
+        CrimeLab.get(getActivity())
+                .updateCrime(mCrime);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
