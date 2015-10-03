@@ -11,6 +11,9 @@ public class Crime {
     private Date mDate;
     private Date mTime;
     private boolean mSolved;
+    private String mSuspect;
+    private String mSuspectID;
+    private String mSuspectPhone;
 
     public Crime() {
         //Generate unique identifier
@@ -20,6 +23,23 @@ public class Crime {
         //mDate = new Date();
         //mTime = new Date();
     }
+
+    public String getSuspectPhone() {
+        return mSuspectPhone;
+    }
+
+    public void setSuspectPhone(String suspectPhone) {
+        mSuspectPhone = suspectPhone;
+    }
+
+    public String getSuspectID() {
+        return mSuspectID;
+    }
+
+    public void setSuspectID(String suspectID) {
+        mSuspectID = suspectID;
+    }
+
 
     public Crime(UUID id) {
         mId = id;
@@ -79,6 +99,14 @@ public class Crime {
     public void setTime(Date time)
     {
         mTime = time;
+    }
+
+    public String getSuspect() {
+        return mSuspect;
+    }
+
+    public void setSuspect(String suspect) {
+        mSuspect = suspect;
     }
 
 }

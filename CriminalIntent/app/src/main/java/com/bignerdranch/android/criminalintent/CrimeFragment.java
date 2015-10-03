@@ -2,10 +2,15 @@ package com.bignerdranch.android.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -44,13 +49,22 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_TIME = 1;
     //09-11-15 Added for Ch 12 Challenge 1 delete
     private static final int REQUEST_DELETE = 3;
+    //09-30-15 Added for Ch 15 Implicit Intents
+    private Button mReportButton;
+    private static final int REQUEST_CONTACT = 4;
+    private Button mSuspectButton;
+    //10-01/-15 Added for Ch 15 Challenge #2 phone suspect
+    private static final int REQUEST_SUSPECT_PHONE = 5;
+    private Button mSuspectPhoneButton;
+    private static final int REQUEST_CALL_SUSPECT = 6;
+    private Button mCallSuspectButton;
 
     //Create bundle arguments for the fragment
     public static CrimeFragment newInstance(UUID crimeId) {
 
         Bundle args = new Bundle();
         args.putSerializable(ARG_CRIKME_ID, crimeId);
-        Log.d(TAG, "Current crimeId: " + crimeId);
+        //Log.d(TAG, "Current crimeId: " + crimeId);
 
         CrimeFragment fragment = new CrimeFragment();
         fragment.setArguments(args);
@@ -155,7 +169,7 @@ public class CrimeFragment extends Fragment {
         //09-03-15 Added Crime Time
         mTimeButton = (Button)v.findViewById(R.id.crime_time);
         String formatedTime = DateFormat.format("HH:mm", mCrime.getTime()).toString();
-        Log.d(TAG, "formatedTime: " + formatedTime);
+        //Log.d(TAG, "formatedTime: " + formatedTime);
         updateTime(formatedTime);
         //Lstener to handle FragmentManager with dialog and time picker
         mTimeButton.setOnClickListener(new View.OnClickListener() {
@@ -169,9 +183,7 @@ public class CrimeFragment extends Fragment {
                 try {
                     dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
                     dialog.show(manager, DIALOG_TIME);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     Log.d(TAG, "Error creating dialog : " + ex.getMessage());
                 }
             }
@@ -188,6 +200,86 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        //09-30-15 Added for Ch 15 Implicit Intents
+
+        mReportButton = (Button)  v.findViewById(R.id.crime_report);
+        mReportButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //10-01-15 Ch 15 Challenge #1 using ShareCompat.IntentBuilider
+                ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder
+                        .from(getActivity());
+                builder.setType("text/plain");
+                builder.setSubject(getString(R.string.crime_report_subject));
+                builder.setText(getCrimeReport());
+                builder.startChooser();
+                //Intent i = new Intent(Intent.ACTION_SEND);
+                //i.setType("text/plain");
+                //i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                //i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                //i = Intent.createChooser(i, getString(R.string.send_report));
+                //startActivity(i);
+            }
+        });
+
+        //Getting content from the ContactsContact.Contact database
+        final Intent pickContentContact =
+                new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        //The code below used for test only to trigger the PackagManager check to fail - disable button
+        //pickContentContact.addCategory(Intent.CATEGORY_HOME);
+        mSuspectButton = (Button) v.findViewById(R.id.crime_suspect);
+        mSuspectButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivityForResult(pickContentContact, REQUEST_CONTACT);
+            }
+        });
+
+        if (mCrime.getSuspect() != null) {
+            mSuspectButton.setText(mCrime.getSuspect());
+        }
+
+        //10-01-15 Ch 15 Challenge #2 Call the suspect
+        //Getting content from the ContactsContact.Contact database
+        final Intent pickContentPhone =
+                new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+        //The code below used for test only to trigger the PackagManager check to fail - disable button
+        //pickContentContact.addCategory(Intent.CATEGORY_HOME);
+        mSuspectPhoneButton = (Button) v.findViewById(R.id.suspect_phone);
+        mSuspectPhoneButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivityForResult(pickContentPhone, REQUEST_SUSPECT_PHONE);
+            }
+        });
+
+        if (mCrime.getSuspectPhone() != null) {
+            mSuspectPhoneButton.setText(mCrime.getSuspectPhone());
+        }
+
+        //10-03-15 Ch 15 Challenge #2 Call the suspect
+        mCallSuspectButton = (Button)  v.findViewById(R.id.call_suspect);
+        mCallSuspectButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            Intent i = new Intent(Intent.ACTION_DIAL);
+            i.setData(Uri.parse("tel:" + mCrime.getSuspectPhone()));
+            startActivity(i);
+            }
+        });
+
+        //If the users device does not have a contact option disable the suspect button
+        //to avoid an app crash
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(pickContentContact,
+                PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mSuspectButton.setEnabled(false);
+        }
+
+        //If the users device does not have a phone option disable the
+        // call suspect button to avoid an app crash
+        if (packageManager.resolveActivity(pickContentPhone,
+                PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mSuspectPhoneButton.setEnabled(false);
+        }
+
+        //Return the view
         return v;
 
     }
@@ -218,6 +310,82 @@ public class CrimeFragment extends Fragment {
             String formatedTime = DateFormat.format("HH:mm", mCrime.getTime()).toString();
             updateTime(formatedTime);
         }
+
+        //09-30-15 added for Ch 15 Implied Intents
+        if (requestCode != REQUEST_DATE && requestCode != REQUEST_TIME) {
+            if (requestCode == REQUEST_CONTACT && data != null) {
+                Uri contactUri = data.getData();
+                //Specify which values you want your query to return values for
+                String[] queryFields = new String[] {
+                        ContactsContract.Contacts.DISPLAY_NAME,
+                        ContactsContract.Contacts._ID
+                };
+                //Perform your query - the contactUri is like a 'where'
+                //clause here
+                Cursor c = getActivity().getContentResolver()
+                        .query(contactUri, queryFields, null, null, null);
+                try {
+                    //Check that you actually got results
+                    if (c.getCount() == 0 ) {
+                        return;
+                    }
+                    //Extract the first column of the first row of data
+                    //which is your suspect's name
+                    c.moveToFirst();
+                    String suspect = c.getString(0);
+                    //10-01-15 - Ch 15 Challenge #2 get suspect ID to use in suspect phone query later
+                    mCrime.setSuspectID(c.getString(1));
+                    mCrime.setSuspect(suspect);
+                    mSuspectButton.setText(suspect);
+                }
+                catch (Exception ex) {
+                    Log.d(TAG, "onActivityResult Contact Error using content resolver : " + ex.getMessage());
+                }
+                finally {
+                    c.close();
+                }
+
+            }
+        }
+
+        //10-01-15 added for Ch 15 Implied Intents, Challenge #2 call suspect
+        if (requestCode != REQUEST_DATE
+            && requestCode != REQUEST_TIME
+            && requestCode != REQUEST_CONTACT) {
+            if (requestCode == REQUEST_SUSPECT_PHONE && data != null) {
+                Uri contactUri = data.getData();
+                //Specify which values you want your query to return values for
+                String[] queryFields = new String[] {
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                };
+                //Perform your query - the contactUri is like a 'where'
+                //clause here
+                Cursor c = getActivity().getContentResolver()
+                        .query(contactUri, queryFields,
+                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = ?",
+                                new String[]{mCrime.getSuspectID()},
+                                 null);
+                try {
+                    //Check that you actually got results
+                    if (c.getCount() == 0 ) {
+                        return;
+                    }
+                    //Extract the first column of the first row of data
+                    //which is your suspect's phone number
+                    c.moveToFirst();
+                    String suspectphone = c.getString(0);
+                    mCrime.setSuspectPhone(suspectphone);
+                    mSuspectPhoneButton.setText(suspectphone);
+                }
+                catch (Exception ex) {
+                    Log.d(TAG, "onActivityResult Call Suspect Error using content resolver : " + ex.getMessage());
+                }
+                finally {
+                    c.close();
+                }
+            }
+        }
+
 
     }
 
@@ -259,5 +427,30 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    //09-30-15 Added for Ch 15 Implicit Intents
+    private String getCrimeReport() {
+        String solvedString = null;
+        if (mCrime.isSolved()) {
+            solvedString = getString(R.string.crime_report_solved);
+        } else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+
+        String dateFormat = "EEE, MMM dd";
+        String dateString = DateFormat.format(dateFormat, mCrime.getDate()).toString();
+
+        String suspect = mCrime.getSuspect();
+        if (suspect == null) {
+            suspect = getString(R.string.crime_report_no_suspect);
+        } else {
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+
+        String report = getString(R.string.crime_report, mCrime.getTitle(),
+                dateString, solvedString, suspect);
+
+        return report;
+
+    }
 
 }

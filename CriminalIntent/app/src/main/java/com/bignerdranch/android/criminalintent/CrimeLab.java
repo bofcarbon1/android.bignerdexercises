@@ -57,8 +57,15 @@ public class CrimeLab {
         ContentValues values = new ContentValues();
         values.put(CrimeTable.Cols.UUID, crime.getId().toString());
         values.put(CrimeTable.Cols.TITLE, crime.getTitle());
+        values.put(CrimeTable.Cols.DETAIL, crime.getDetail());
         values.put(CrimeTable.Cols.DATE, crime.getDate().getTime());
+        values.put(CrimeTable.Cols.TIME, crime.getTime().getTime());
         values.put(CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+        //10-01-15 Added for Ch 15 Implicit Intents
+        values.put(CrimeTable.Cols.SUSPECT, crime.getSuspect());
+        //10-01-15 Added for Ch 15 Challenge #2 call suspect
+        values.put(CrimeTable.Cols.SUSPECTID, crime.getSuspectID());
+        values.put(CrimeTable.Cols.SUSPECTPHONE, crime.getSuspectPhone());
 
         return values;
     }
