@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,11 +23,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,6 +42,8 @@ public class CrimeFragment extends Fragment {
     //09-03-15 Added for time challenge
     private static final String DIALOG_TIME = "DialogTime";
     private static final String DIALOG_DATE = "DialogDate";
+    //10-07-15 Ch 16 Challenge #1
+    private static final String DIALOG_ZOON = "DialogZoom";
     private Crime mCrime;
     private EditText mTitleField;
     private EditText mDetailField;
@@ -58,6 +66,17 @@ public class CrimeFragment extends Fragment {
     private Button mSuspectPhoneButton;
     private static final int REQUEST_CALL_SUSPECT = 6;
     private Button mCallSuspectButton;
+    //10-04-15 Added for Ch 16 Taking Pictures with intents
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
+    private File mPhotoFile;
+    private static final int REQUEST_PHOTO = 7;
+    //10-07-15 Ch 16 Challenge #1 photo zoom
+    private static final int REQUEST_PHOTO_ZOOM = 8;
+    //10-08-15 Ch 16 Challenge #2 Global Layout listener
+    private int photoLayoutWidth = 0;
+    private int photoLayoutHeight = 0;
+
 
     //Create bundle arguments for the fragment
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -84,6 +103,8 @@ public class CrimeFragment extends Fragment {
         //UUID crimeId = (UUID) getActivity().getIntent().getSerializableExtra(CrimeActivity.EXTRA_CRIME_ID);
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIKME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        //10-04-15 Added for Ch 16 Taking Pictures with intents
+        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
 
     }
 
@@ -279,6 +300,47 @@ public class CrimeFragment extends Fragment {
             mSuspectPhoneButton.setEnabled(false);
         }
 
+        //10-04-15 Added for Ch 16 Taking Pictures w/ Intents
+        mPhotoButton = (ImageButton) v.findViewById(R.id.crime_camera);
+
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        boolean canTakePhoto = mPhotoFile != null &&
+                captureImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+
+        if (canTakePhoto) {
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    startActivityForResult(captureImage, REQUEST_PHOTO);
+                }
+        });
+
+        mPhotoView = (ImageView)  v.findViewById(R.id.crime_photo);
+        updatePhotoView();
+
+        //Ch 16 Challenge #1
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager manager = getFragmentManager();
+                PhotoZoomFragment dialog = PhotoZoomFragment
+                        .newInstance(mPhotoFile);
+                //Set the CrimeFragment to be the target of the PhotoZoomFragment
+                //That way we can get zoom on our suspect photo
+                try {
+                    dialog.setTargetFragment(CrimeFragment.this, REQUEST_PHOTO_ZOOM);
+                    dialog.show(manager, DIALOG_ZOON);
+                } catch (Exception ex) {
+                    Log.d(TAG, "Error creating dialog : " + ex.getMessage());
+                }
+            }
+        });
+
         //Return the view
         return v;
 
@@ -386,6 +448,18 @@ public class CrimeFragment extends Fragment {
             }
         }
 
+        //10-04-15 added for Ch 16 Taking pictures with  Implied Intents
+        if (requestCode != REQUEST_DATE
+                && requestCode != REQUEST_TIME
+                && requestCode != REQUEST_CONTACT
+                && requestCode != REQUEST_SUSPECT_PHONE) {
+            if (requestCode == REQUEST_PHOTO) {
+                //Ch 16 Challenge #2 will move when this happens to a listener
+                //was not done. Never did understand how to do this or why
+                //you have to use a view tree to get the phot object size
+                updatePhotoView();
+            }
+        }
 
     }
 
@@ -451,6 +525,16 @@ public class CrimeFragment extends Fragment {
 
         return report;
 
+    }
+
+    //10-04-15 Added Ch 16 Taking pictures w/ intents
+    private void updatePhotoView () {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
 
 }

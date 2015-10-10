@@ -109,4 +109,9 @@ public class Crime {
         mSuspect = suspect;
     }
 
+    //10-04-15 Added for Ch16 Taking Pictures w/ intents
+    public String getPhotoFilename() {
+        return "IMG_" + getId().toString() + ".jpg";
+    }
+
 }

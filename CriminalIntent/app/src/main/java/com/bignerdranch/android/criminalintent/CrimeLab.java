@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -151,7 +153,7 @@ public class CrimeLab {
         ContentValues values = getContentValues(crime);
         mDatabase.update(CrimeTable.NAME, values,
                 CrimeTable.Cols.UUID + " = ?",
-                new String[]  {uuidString});
+                new String[]{uuidString});
 
     }
 
@@ -173,6 +175,18 @@ public class CrimeLab {
         //        break;
         //    }
         //}
+    }
+
+    //10-04-15 Added for Ch 16 Taking Pictures with intents
+    public File getPhotoFile(Crime crime) {
+        File externalFilesDir =
+                mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (externalFilesDir == null) {
+            return null;
+        }
+
+        return new File(externalFilesDir, crime.getPhotoFilename());
     }
 
 }
