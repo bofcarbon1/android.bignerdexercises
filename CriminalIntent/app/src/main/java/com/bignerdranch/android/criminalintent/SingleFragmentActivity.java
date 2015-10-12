@@ -1,19 +1,35 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.support.annotation.LayoutRes;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
-public abstract class SingleFragmentActivity extends AppCompatActivity {
+public abstract class SingleFragmentActivity extends AppCompatActivity  {
 
+    private static final String TAG = "SingleFragmentActivity";
     protected  abstract Fragment createFragment();
+
+    //10-10-15 Ch 17 Tablet/Phone support
+    @LayoutRes
+    protected int getLayoutResId() {
+        Log.d(TAG, "getLayoutResId started");
+        return R.layout.activity_fragment;
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+
+        //10-10-15 Ch 17 Table/Phone support
+        //setContentView(R.layout.activity_fragment);
+        Log.d(TAG, "onCreate setContentView started");
+        setContentView(getLayoutResId());
 
         //Work with the fragment hosted by this activity via the fragment manager
         FragmentManager fm = getSupportFragmentManager();

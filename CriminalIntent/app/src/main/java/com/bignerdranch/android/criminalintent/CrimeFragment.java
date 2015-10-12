@@ -76,7 +76,14 @@ public class CrimeFragment extends Fragment {
     //10-08-15 Ch 16 Challenge #2 Global Layout listener
     private int photoLayoutWidth = 0;
     private int photoLayoutHeight = 0;
+    //10-10-15 Ch 17 Tablet/Phone support Callbacks fragment/activity
+    private Callbacks mCallbacks;
 
+    //10-10-15 Ch 17 Tablet/Phone support Callbacks fragment/activity
+    //Required interface for hosting activities
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
 
     //Create bundle arguments for the fragment
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -89,6 +96,14 @@ public class CrimeFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
 
+    }
+
+    //The new version of this uses context and when
+    //done with Ch 17 may want to try to convert it
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;
     }
 
     @Override
@@ -117,6 +132,13 @@ public class CrimeFragment extends Fragment {
                 .updateCrime(mCrime);
     }
 
+    //10-10-15 Ch 17 Tablet/Phone support Callbacks fragment and activity
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -138,6 +160,9 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
+                //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                //Update when text is changed in title
+                updateCrime();
             }
 
             @Override
@@ -158,6 +183,9 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setDetail(s.toString());
+                //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                //Update when text is changed in title
+                updateCrime();
             }
 
             @Override
@@ -218,6 +246,9 @@ public class CrimeFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 //Set the crime's solved property
                 mCrime.setSolved(isChecked);
+                //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                //Update when text is changed in title
+                updateCrime();
             }
         });
 
@@ -361,6 +392,9 @@ public class CrimeFragment extends Fragment {
             mCrime.setDate(date);
             String formatedDate = DateFormat.format("EEEE , MMM dd yyyy", mCrime.getDate()).toString();
             //updateDate(mCrime.getDate().toString());
+            //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+            //Update when text is changed in title
+            updateCrime();
             updateDate(formatedDate);
         }
 
@@ -370,6 +404,9 @@ public class CrimeFragment extends Fragment {
                     .getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setTime(time);
             String formatedTime = DateFormat.format("HH:mm", mCrime.getTime()).toString();
+            //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+            //Update when text is changed in title
+            updateCrime();
             updateTime(formatedTime);
         }
 
@@ -398,6 +435,9 @@ public class CrimeFragment extends Fragment {
                     //10-01-15 - Ch 15 Challenge #2 get suspect ID to use in suspect phone query later
                     mCrime.setSuspectID(c.getString(1));
                     mCrime.setSuspect(suspect);
+                    //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                    //Update when text is changed in title
+                    updateCrime();
                     mSuspectButton.setText(suspect);
                 }
                 catch (Exception ex) {
@@ -437,6 +477,9 @@ public class CrimeFragment extends Fragment {
                     c.moveToFirst();
                     String suspectphone = c.getString(0);
                     mCrime.setSuspectPhone(suspectphone);
+                    //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                    //Update when text is changed in title
+                    updateCrime();
                     mSuspectPhoneButton.setText(suspectphone);
                 }
                 catch (Exception ex) {
@@ -454,6 +497,9 @@ public class CrimeFragment extends Fragment {
                 && requestCode != REQUEST_CONTACT
                 && requestCode != REQUEST_SUSPECT_PHONE) {
             if (requestCode == REQUEST_PHOTO) {
+                //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+                //Update when text is changed in title
+                updateCrime();
                 //Ch 16 Challenge #2 will move when this happens to a listener
                 //was not done. Never did understand how to do this or why
                 //you have to use a view tree to get the phot object size
@@ -535,6 +581,13 @@ public class CrimeFragment extends Fragment {
             Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
             mPhotoView.setImageBitmap(bitmap);
         }
+    }
+
+    //10-10-16 CH 17 Tablet/Phone support Callbacks fragment/activity
+    //Update crime via Callbacks
+    private void updateCrime() {
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
     }
 
 }

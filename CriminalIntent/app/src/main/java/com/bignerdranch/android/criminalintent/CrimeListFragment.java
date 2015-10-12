@@ -1,6 +1,7 @@
 package com.bignerdranch.android.criminalintent;
 
-import android.content.Context;
+import android.app.Activity;
+//import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import java.util.List;
-import java.util.UUID;
+//import java.util.UUID;
 
 public class CrimeListFragment extends Fragment {
 
@@ -31,7 +32,22 @@ public class CrimeListFragment extends Fragment {
     private int mCurrentPosition = 0;
     private static final String KEY_INDEX = "index";
     private boolean mSubtitleVisible;
+    //10-10-15 Ch 17 Table/Phone Support Callbacks fragments to activity
+    private Callbacks mCallbacks;
 
+    //10-10-15 Ch 17 Table/Phone Support Callbacks fragments to activity
+    //Required interface for hosting activities
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
+
+    //The new version of this uses context and when
+    //done with Ch 17 may want to try to convert it
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;
+    }
 
     //Tell fragment manager that fragment should receive a call to a menu on callback
     @Override
@@ -71,6 +87,13 @@ public class CrimeListFragment extends Fragment {
         outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
 
+    //10-10-15 Ch 17 Tablet/Phone support Callbacks fragment and activity
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
     //Handle the creation of the menu when a callback is done
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -92,9 +115,15 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity
-                        .newIntent(getActivity(), crime.getId());
-                startActivity(intent);
+
+                //10-10-15 Ch 17 Tablet/Phone support & Callbacks fragment to activity
+                //Intent intent = CrimePagerActivity
+                //        .newIntent(getActivity(), crime.getId());
+                //startActivity(intent);
+                //Use the CallBacks to resolve the fragment/activity for the device UI
+                updateUI();
+                mCallbacks.onCrimeSelected(crime);
+
                 return true;
             case R.id.menu_item_show_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
@@ -122,8 +151,10 @@ public class CrimeListFragment extends Fragment {
         activity.getSupportActionBar().setSubtitle(subtitle);
     }
 
+    //10-10-15 Ch 17 Table/Phone support Callbacks fragment/activity
+    //Made this method public so it could be invoked from CrimeListActivity
     //Realod the list of crimes in RecyclerView
-    private void updateUI () {
+    public void updateUI () {
 
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
@@ -200,11 +231,14 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
+            //10-10-15 Ch 17 Tablet/Phone support & Callbacks fragment to activity
             //08-29-15 modified to use CrimePagerActivity to page through crimes
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-            mCurrentPosition = getLayoutPosition();
+            //Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+            //mCurrentPosition = getLayoutPosition();
             //Log.d(TAG, "position: " + mCurrentPosition);
-            startActivity(intent);
+            //startActivity(intent);
+            //Use the CallBacks to resolve the fragment/activity listerner passing the crime obj
+            mCallbacks.onCrimeSelected(mCrime);
 
         }
 
